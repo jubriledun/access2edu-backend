@@ -1,10 +1,28 @@
- const express = require('express');
- const app = express();
- const port = 3000
- 
- app.get('/', (req, res)  => {
-    res.send('Hello world');
- });
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import "express-async-errors";
+import globalError from "./config/globalErrors.js";
 
- app.listen(port,() => {
-    console.log(`server running at http://localhost:${port}`); });
+const app = express();
+
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:3000",
+  })
+);
+
+app.all("*", (req, res, next) => {
+  res.status(400).json({
+    success: false,
+    message: `Can"t find ${req.originalUrl} on the server`,
+  });
+});
+
+app.use(globalError);
+app.listen(process.env.PORT, () => {
+  console.log(`Server running on http://localhost:${process.env.PORT}`);
+});
