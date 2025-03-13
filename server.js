@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import "express-async-errors";
 import globalError from "./config/globalErrors.js";
+import logger from "./config/logger.js";
 
 const app = express();
 
@@ -24,5 +25,5 @@ app.all("*", (req, res, next) => {
 
 app.use(globalError);
 app.listen(process.env.PORT, () => {
-  console.log(`Server running on http://localhost:${process.env.PORT}`);
+  logger.info(`Server running on http://localhost:${process.env.PORT}`);
 });
