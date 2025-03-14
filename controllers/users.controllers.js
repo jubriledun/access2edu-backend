@@ -14,7 +14,9 @@ export const Signup = async (req, res, next) => {
 
   const existingUser = await userModel.findOne({ email });
   if (existingUser) {
-    return next(new Error(401, "User already exist. Please Login"));
+    const error = new Error("User already exist. Please login");
+    error.statusCode = 400;
+    return next(error);
   }
 
   const user = await userModel.create({
@@ -28,7 +30,9 @@ export const Signup = async (req, res, next) => {
 
   const newUser = userModel.findById(user._id);
   if (!newUser) {
-    return next(new Error(500, "Error while signup"));
+    const error = new Error("Account not created. Pleae try again");
+    error.statusCode = 500;
+    return next(error);
   }
 
   const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
@@ -59,12 +63,16 @@ export const Login = async (req, res, next) => {
 
   const user = await userModel.findOne({ email });
   if (!user) {
-    return next(new Error(404, "User Not found"));
+    const error = new Error("User not found");
+    error.statusCode = 404;
+    return next(error);
   }
 
   const isMatch = await user.comparePassword(password, user.password);
   if (!isMatch) {
-    return next(new Error("Invalid Credentials"));
+    const error = new Error("Invalid Credentials");
+    error.statusCode = 401;
+    return next(error);
   }
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {

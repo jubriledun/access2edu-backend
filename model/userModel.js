@@ -35,8 +35,13 @@ const userSchema = new mongoose.Schema({
     },
     message: "Check Password",
   },
-  forgotPassword: {
+  forgotPasswordOTP: {
     type: String,
+    default: "",
+  },
+  forgotPasswordOTPExpireAt: {
+    type: Date,
+    default: Date.now,
   },
 
   roles: {
