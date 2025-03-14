@@ -1,19 +1,29 @@
 import jwt from "jsonwebtoken";
+import userModel from "../model/userModel.js";
 
-const userAuth = (req, res, next) => {
+const userAuth = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return next(
-      new Error(401, "You are not authorized. Please login to continue")
-    );
+    const error = new Error("You are not authorized. Please login to continue");
+    error.statusCode = 401;
+    return next(error);
   }
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   if (!decoded || !decoded.id) {
-    return next(new Error(401, "Invalid token"));
+    const error = new Error("Invalid token");
+    error.statusCode = 401;
+    return next(error);
   }
-  req.user = decoded;
+  const loggedInUser = await userModel.findById(decoded.id);
+  if (!loggedInUser) {
+    const error = new Error("Invalid User information");
+    error.statusCode = 404;
+    return next(error);
+  }
+
+  req.user = loggedInUser;
   next();
 };
 

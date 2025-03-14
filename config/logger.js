@@ -1,5 +1,5 @@
-import winston from 'winston';
-import 'winston-mongodb';
+import winston from "winston";
+import "winston-mongodb";
 
 const logger = winston.createLogger({
   format: winston.format.combine(
@@ -17,21 +17,22 @@ const logger = winston.createLogger({
     }),
   ],
   exceptionHandlers: [
-    new winston.exceptions.handle({
+    new winston.transports.Console(),
+    new winston.transports.File({
       filename: "exceptions.log",
       level: "error",
     }),
-    new winston.exceptions.MongoDB({
+    new winston.transports.MongoDB({
       db: process.env.MONGO_URI,
       collection: "exceptions",
     }),
   ],
   rejectionHandlers: [
-    new winston.rejections.handle({
+    new winston.transports.Console(),
+    new winston.transports.File({
       filename: "exceptions.log",
-      level: "error",
     }),
-    new winston.rejections.MongoDB({
+    new winston.transports.MongoDB({
       db: process.env.MONGO_URI,
       collection: "exceptions",
     }),
