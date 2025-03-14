@@ -30,6 +30,7 @@ export const Signup = async (req, res, next) => {
   if (!newUser) {
     return next(new Error(500, "Error while signup"));
   }
+  
 
   const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
     expiresIn: "3d",
