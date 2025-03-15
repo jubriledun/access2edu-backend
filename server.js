@@ -6,6 +6,7 @@ import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/userRouters.js";
+import videoRouter from "./routes/videoRouter.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(
 );
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/videos", videoRouter);
 
 app.all("*", (req, res, next) => {
   res.status(400).json({

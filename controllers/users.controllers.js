@@ -130,3 +130,102 @@ export const Login = async (req, res, next) => {
     user,
   });
 };
+
+export const Logout = async (req, res, next) => {
+  const { token } = req.cookies;
+  if (!token) {
+    const error = new Error("You are not logged in");
+    error.statusCode = 400;
+    return next(error);
+  }
+
+  res.clearCookie("token", token, {
+    httpOnly: true,
+    sameSite: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logout successful",
+  });
+};
+
+export const updateUser = async (req, res, next) => {
+  const userId = req.user._id;
+  if (!userId) {
+    const error = new Error("Please Login to continue");
+    res.statusCode = 401;
+    return next(error);
+  }
+
+  const user = await userModel.findById(userId);
+  if (!user) {
+    const error = new Error("User not found");
+    res.statusCode = 404;
+    return next(error);
+  }
+
+  let uploadResult = { secure_url: "", public_id: "" }; // Default values
+
+  if (req.file) {
+    uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "auto" },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+  }
+  const userToUpdate = await userModel.findByIdAndUpdate(
+    user._id,
+    {
+      $set: {
+        first_lastName,
+        other_names,
+        parent_guardian_name,
+        profilePicture: uploadResult.secure_url,
+        cloudinary_id: uploadResult.public_id,
+      },
+    },
+    { new: true, runValidators: true }
+  );
+
+  res.status(201).json({
+    success: true,
+    message: "Profile update successful",
+    userToUpdate,
+  });
+};
+
+export const deleteUser = async (req, res, next) => {
+  const userId = req.user._id;
+  if (!userId) {
+    const error = new Error("Please Login to continue");
+    res.statusCode = 401;
+    return next(error);
+  }
+
+  const user = await userModel.findById(userId);
+  if (!user) {
+    const error = new Error("User not found");
+    res.statusCode = 404;
+    return next(error);
+  }
+
+  const userToDelete = await userModel.findByIdAndDelete(user._id);
+  if (!userToDelete) {
+    const error = new Error("User not found");
+    res.statusCode = 404;
+    return next(error);
+  }
+  res.status(200).json({
+    success: true,
+    message: "User deleted successfully",
+  });
+};
