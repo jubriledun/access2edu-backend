@@ -5,6 +5,7 @@ import "express-async-errors";
 import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
 import connectDB from "./config/db.js";
+import userRouter from "./routes/userRouters.js";
 
 const app = express();
 
@@ -16,6 +17,8 @@ app.use(
     origin: "http://localhost:3000",
   })
 );
+
+app.use("/api/v1/users", userRouter);
 
 app.all("*", (req, res, next) => {
   res.status(400).json({

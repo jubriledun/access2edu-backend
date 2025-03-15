@@ -53,7 +53,6 @@ export const Signup = async (req, res, next) => {
     error.statusCode = 500;
     return next(error);
   }
-  
 
   const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
     expiresIn: "3d",
