@@ -2,6 +2,7 @@ import { validateLogin, validateSignup } from "../config/validation.js";
 import userModel from "../model/userModel.js";
 import jwt from "jsonwebtoken";
 import transporter from "../utils/nodemailer.js";
+import cloudinary from "../config/cloudinary.config.js";
 
 export const Signup = async (req, res, next) => {
   const { error } = validateSignup(req.body);
@@ -19,16 +20,34 @@ export const Signup = async (req, res, next) => {
     return next(error);
   }
 
+  let uploadResult = { secure_url: "", public_id: "" }; // Default values
+
+  if (req.file) {
+    uploadResult = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { resource_type: "auto" },
+        (error, result) => {
+          if (error) {
+            return reject(error);
+          }
+          resolve(result);
+        }
+      );
+      stream.end(req.file.buffer);
+    });
+  }
+
   const user = await userModel.create({
     first_lastName,
     other_names,
     email,
     parent_guardian_name,
     password,
-    confirmPassword,
+    profilePicture: uploadResult.secure_url,
+    cloudinary_id: uploadResult.public_id,
   });
 
-  const newUser = userModel.findById(user._id);
+  const newUser = await userModel.findById(user._id);
   if (!newUser) {
     const error = new Error("Account not created. Pleae try again");
     error.statusCode = 500;
@@ -45,6 +64,13 @@ export const Signup = async (req, res, next) => {
     maxAge: 3 * 24 * 60 * 60 * 1000,
   });
 
+  const mailOptions = {
+    from: process.env.SMTP_EMAIL,
+    to: newUser.email,
+    subject: "Registration Sucessful on Access2edu",
+    text: `Welcome ${newUser.first_lastName}, You are successfully registered on our educational platform Access2edu. Congrats on taken the right decision`,
+  };
+  await transporter.sendMail(mailOptions);
   res.status(201).json({
     success: true,
     message: "Account creation successful",
