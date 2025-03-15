@@ -20,7 +20,6 @@ const logger = winston.createLogger({
     new winston.transports.Console(),
     new winston.transports.File({
       filename: "exceptions.log",
-      level: "error",
     }),
     new winston.transports.MongoDB({
       db: process.env.MONGO_URI,
@@ -30,11 +29,11 @@ const logger = winston.createLogger({
   rejectionHandlers: [
     new winston.transports.Console(),
     new winston.transports.File({
-      filename: "exceptions.log",
+      filename: "rejections.log",
     }),
     new winston.transports.MongoDB({
       db: process.env.MONGO_URI,
-      collection: "exceptions",
+      collection: "rejections",
     }),
   ],
 });

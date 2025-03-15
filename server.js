@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import "express-async-errors";
 import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
+import connectDB from "./config/db.js";
 
 const app = express();
 
@@ -24,6 +25,8 @@ app.all("*", (req, res, next) => {
 });
 
 app.use(globalError);
+
+await connectDB();
 app.listen(process.env.PORT, () => {
   logger.info(`Server running on http://localhost:${process.env.PORT}`);
 });
