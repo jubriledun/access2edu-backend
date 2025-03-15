@@ -9,7 +9,16 @@ const schema = Joi.object({
 });
 
 export const validateSignup = (user) => {
-  schema.validate(user);
+  return (req, res, next) => {
+    const { error } = schema.validate(user);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details[0].message,
+      });
+    }
+    next();
+  };
 };
 
 const loginSchema = Joi.object({
@@ -18,5 +27,11 @@ const loginSchema = Joi.object({
 });
 
 export const validateLogin = (user) => {
-  loginSchema.validate(user);
+  const { error } = loginSchema.validate(user);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
 };

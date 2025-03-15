@@ -5,12 +5,25 @@ import transporter from "../utils/nodemailer.js";
 import cloudinary from "../config/cloudinary.config.js";
 
 export const Signup = async (req, res, next) => {
-  const { error } = validateSignup(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.details[0].message,
-    });
+  const {
+    first_lastName,
+    other_names,
+    email,
+    password,
+    confirmPassword,
+    parent_guardian_name,
+  } = req.body;
+  if (
+    !first_lastName ||
+    !other_names ||
+    !email ||
+    !password ||
+    !confirmPassword ||
+    !parent_guardian_name
+  ) {
+    const error = new Error("All fields are required");
+    error.statusCode = 400;
+    return next(error);
   }
 
   const existingUser = await userModel.findOne({ email });
@@ -43,6 +56,7 @@ export const Signup = async (req, res, next) => {
     email,
     parent_guardian_name,
     password,
+    confirmPassword,
     profilePicture: uploadResult.secure_url,
     cloudinary_id: uploadResult.public_id,
   });
@@ -64,13 +78,13 @@ export const Signup = async (req, res, next) => {
     maxAge: 3 * 24 * 60 * 60 * 1000,
   });
 
-  const mailOptions = {
-    from: process.env.SMTP_EMAIL,
-    to: newUser.email,
-    subject: "Registration Sucessful on Access2edu",
-    text: `Welcome ${newUser.first_lastName}, You are successfully registered on our educational platform Access2edu. Congrats on taken the right decision`,
-  };
-  await transporter.sendMail(mailOptions);
+  // const mailOptions = {
+  //   from: process.env.SMTP_EMAIL,
+  //   to: newUser.email,
+  //   subject: "Registration Sucessful on Access2edu",
+  //   text: `Welcome ${newUser.first_lastName}, You are successfully registered on our educational platform Access2edu. Congrats on taken the right decision`,
+  // };
+  // await transporter.sendMail(mailOptions);
   res.status(201).json({
     success: true,
     message: "Account creation successful",
@@ -79,17 +93,16 @@ export const Signup = async (req, res, next) => {
 };
 
 export const Login = async (req, res, next) => {
-  const { error } = validateLogin(req.body);
-  if (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.details[0].message,
-    });
+  const { email, password } = req.body;
+  if (!email || !password) {
+    const error = new Error("All fields are required");
+    error.statusCode = 400;
+    return next(error);
   }
 
   const user = await userModel.findOne({ email });
   if (!user) {
-    const error = new Error("User not found");
+    const error = new Error("Invalid Credentials");
     error.statusCode = 404;
     return next(error);
   }
