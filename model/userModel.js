@@ -43,7 +43,13 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-
+  profilePicture: {
+    type: String,
+    default: "",
+  },
+  cloudinary_id: {
+    type: String,
+  },
   roles: {
     enum: ["admin", "user"],
     default: "user",
