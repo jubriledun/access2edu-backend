@@ -4,8 +4,8 @@ const schema = Joi.object({
   first_lastName: Joi.string().required(),
   other_names: Joi.string(),
   email: Joi.string().required().email(),
-  password: Joi.string().required().min(8).max(255),
-  confirmPassword: Joi.string().required().min().max(255),
+  password: Joi.string().required(),
+  confirmPassword: Joi.string().required(),
 });
 
 export const validateSignup = (user) => {
