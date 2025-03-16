@@ -6,6 +6,8 @@ import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
 import connectDB from "./config/db.js";
 import userRouter from "./routes/userRouters.js";
+import paymentRoutes from './routes/paymentRoutes.js';
+import webhookRoutes from './routes/webhookRoutes.js';
 
 const app = express();
 
@@ -19,6 +21,10 @@ app.use(
 );
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/payments", paymentRoutes);
+app.use("/webhooks", webhookRoutes);
+
+app.get("/", (req, res) => res.send("Payment Gateway API Running"));
 
 app.all("*", (req, res, next) => {
   res.status(400).json({
