@@ -1,40 +1,56 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = new mongoose.Schema(
+const studentSchema = new mongoose.Schema(
   {
-    first_lastName: {
+    firstName: {
       type: String,
       required: true,
     },
-    other_names: {
+    lastName: {
       type: String,
-      required: false,
+      required: true,
+    },
+    otherName: {
+      type: String,
+    },
+    parent_guardian: {
+      type: String,
+      required: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
     },
-    parent_guardian_name: {
-      type: String,
-      required: true,
-    },
     password: {
       type: String,
       required: true,
-      // minlength: 8,
-      // maxlength: 255,
     },
     confirmPassword: {
       type: String,
-      required: true,
-      // minlength: 8,
-      // maxlength: 255,
       validate: function (value) {
         return this.password === value;
       },
-      message: "Check Password",
+      message: "Password not match",
+    },
+    level: {
+      type: String,
+      required: true,
+    },
+    subjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+        required: true,
+      },
+    ],
+    profilePicture: {
+      type: String,
+      default: "",
+    },
+    cloudinary_id: {
+      type: String,
     },
     forgotPasswordOTP: {
       type: String,
@@ -44,23 +60,15 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    profilePicture: {
-      type: String,
-      default: "",
-    },
-    cloudinary_id: {
-      type: String,
-    },
-    roles: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
+    hasPaid: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+studentSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
 
@@ -68,10 +76,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.comparePassword = async function (password) {
+studentSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-const userModel = mongoose.model("User", userSchema);
+const studentModel = mongoose.model("Student", studentSchema);
 
-export default userModel;
+export default studentModel;
