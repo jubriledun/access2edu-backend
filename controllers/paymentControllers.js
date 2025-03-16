@@ -64,6 +64,7 @@ export const verifyPayment = async (req, res) => {
 
     payment.status = "success";
     await payment.save();
+    
 
     return successResponse(res, "Payment verified successfully", response.data);
   } catch (error) {

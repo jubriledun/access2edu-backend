@@ -13,6 +13,7 @@ export const paystackWebhook = async (req, res) => {
       }
     }
     
+    
     return res.status(200).send("Webhook received");
   } catch (error) {
     console.error("Webhook processing error:", error);
