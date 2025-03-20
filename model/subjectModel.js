@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 
-const videoSchema = new mongoose.Schema(
+const subjectSchema = new mongoose.Schema(
   {
-    video: {
+    name: {
+      type: String,
+      required: true,
+    },
+    videoUrl: {
       type: String,
       required: true,
     },
@@ -14,6 +18,10 @@ const videoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    className: {
+      type: String,
+      required: true,
+    },
     cloudinary_id: {
       type: String,
     },
@@ -21,6 +29,6 @@ const videoSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const videoModel = mongoose.model("Video", videoSchema);
+const subjectModel = mongoose.model("Subject", subjectSchema);
 
-export default videoModel;
+export default subjectModel;

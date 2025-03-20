@@ -1,13 +1,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import "express-async-errors";
 import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
 import connectDB from "./config/db.js";
-import userRouter from "./routes/userRouters.js";
-import paymentRoutes from './routes/paymentRoutes.js';
-import webhookRoutes from './routes/webhookRoutes.js';
+import studentRouter from "./routes/studentRouter.js";
+import subjectRouter from "./routes/subjectRouter.js";
+import adminRouter from "./routes/adminRouter.js";
 
 const app = express();
 
@@ -20,11 +19,9 @@ app.use(
   })
 );
 
-app.use("/api/v1/users", userRouter);
-app.use("/api/payments", paymentRoutes);
-app.use("/webhooks", webhookRoutes);
-
-app.get("/", (req, res) => res.send("Payment Gateway API Running"));
+app.use("/api/v1/students", studentRouter);
+app.use("/api/v1/subjects", subjectRouter);
+app.use("/api/v1/admin", adminRouter);
 
 app.all("*", (req, res, next) => {
   res.status(400).json({
