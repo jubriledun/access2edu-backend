@@ -36,6 +36,10 @@ app.all("*", (req, res, next) => {
 
 app.use(globalError);
 
+app.get("/", (req, res) => {
+  res.send("Access2Edu API is running...");
+});
+
 await connectDB();
 app.listen(process.env.PORT, () => {
   logger.info(`Server running on http://localhost:${process.env.PORT}`);
