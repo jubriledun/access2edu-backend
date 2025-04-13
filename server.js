@@ -7,6 +7,8 @@ import connectDB from "./config/db.js";
 import studentRouter from "./routes/studentRouter.js";
 import subjectRouter from "./routes/subjectRouter.js";
 import adminRouter from "./routes/adminRouter.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
 
 const app = express();
 
@@ -22,6 +24,8 @@ app.use(
 app.use("/api/v1/students", studentRouter);
 app.use("/api/v1/subjects", subjectRouter);
 app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/payment", paymentRoutes);
+app.use("/api/v1/webhook", webhookRoutes);
 
 app.all("*", (req, res, next) => {
   res.status(400).json({

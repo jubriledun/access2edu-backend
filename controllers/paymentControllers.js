@@ -12,9 +12,9 @@ export const initializePayment = async (req, res) => {
     }
     
     
-    // Default amount is 5000
+  
     let amount = 5000;
-    // If a premium plan is selected, set a higher amount which is the bases for the project
+    
     if (plan && plan === "premium") {
       amount = 7000;
     }
@@ -54,7 +54,7 @@ export const verifyPayment = async (req, res) => {
       return errorResponse(res, "Payment record not found", 404);
     }
 
-    // Verify payment status with Paystack
+    
     const response = await paystack.get(`/transaction/verify/${reference}`);
     if (response.data.data.status !== "success") {
       payment.status = "failed";

@@ -3,7 +3,6 @@ import upload from "../config/multer.js";
 import {
   deleteStudent,
   fetchAllSubject,
-  initiatePaymentWithApplePay,
   initiatePaymentWithBankTransfer,
   initiatePaymentWithCard,
   Login,
@@ -35,7 +34,6 @@ studentRouter.post(
   studentAuth,
   initiatePaymentWithBankTransfer
 );
-studentRouter.post("/apple-payment", studentAuth, initiatePaymentWithApplePay);
 studentRouter.post("/verify-payment", studentAuth, verifyPayment);
 studentRouter.post("/send-forgot-password-otp", sendForgotPasswordOTPStudent);
 studentRouter.post("/forgot-password", forgotPasswordStudent);

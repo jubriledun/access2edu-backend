@@ -4,28 +4,14 @@ import cloudinary from "../config/cloudinary.config.js";
 import transporter from "../utils/nodemailer.js";
 import jwt from "jsonwebtoken";
 import subjectModel from "../model/subjectModel.js";
-import Flutterwave from "flutterwave-node-v3";
+import Paystack from 'paystack-node'; // Import Paystack SDK
+
+const paystack = new Paystack(process.env.PAYSTACK_SECRET_KEY); // Initialize Paystack with secret key
 
 export const registerStudent = asyncHandler(async (req, res, next) => {
-  const {
-    firstName,
-    lastName,
-    otherName,
-    level,
-    parent_guardian,
-    email,
-    password,
-    confirmPassword,
-  } = req.body;
-  if (
-    !firstName ||
-    !lastName ||
-    !level ||
-    !parent_guardian ||
-    !email ||
-    !password ||
-    !confirmPassword
-  ) {
+  const { firstName, lastName, otherName, level, parent_guardian, email, password, confirmPassword } = req.body;
+
+  if (!firstName || !lastName || !level || !parent_guardian || !email || !password || !confirmPassword) {
     const error = new Error("This fields are required");
     res.statusCode = 400;
     return next(error);
@@ -39,18 +25,14 @@ export const registerStudent = asyncHandler(async (req, res, next) => {
   }
 
   let uploadResult = { secure_url: "", public_id: "" }; // Default values
-
   if (req.file) {
     uploadResult = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { resource_type: "auto" },
-        (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-          resolve(result);
+      const stream = cloudinary.uploader.upload_stream({ resource_type: "auto" }, (error, result) => {
+        if (error) {
+          return reject(error);
         }
-      );
+        resolve(result);
+      });
       stream.end(req.file.buffer);
     });
   }
@@ -73,7 +55,7 @@ export const registerStudent = asyncHandler(async (req, res, next) => {
 
   const newStudent = await studentModel.findById(student._id);
   if (!newStudent) {
-    const error = new Error("Account not created. Pleae try again");
+    const error = new Error("Account not created. Please try again");
     error.statusCode = 500;
     return next(error);
   }
@@ -91,8 +73,8 @@ export const registerStudent = asyncHandler(async (req, res, next) => {
   const mailOptions = {
     from: process.env.SMTP_EMAIL,
     to: newStudent.email,
-    subject: "Registration Sucessful on Access2edu",
-    text: `Welcome ${newStudent.firstName}, You are successfully registered on our educational platform Access2edu. Congrats on taken the right decision`,
+    subject: "Registration Successful on Access2edu",
+    text: `Welcome ${newStudent.firstName}, You are successfully registered on our educational platform Access2edu. Congrats on taking the right decision.`,
   };
   await transporter.sendMail(mailOptions);
 
@@ -118,7 +100,7 @@ export const Login = asyncHandler(async (req, res, next) => {
     return next(error);
   }
 
-  const isMatch = await user.comparePassword(password, user.password);
+  const isMatch = await student.comparePassword(password, student.password);
   if (!isMatch) {
     const error = new Error("Invalid Credentials");
     error.statusCode = 401;
@@ -193,6 +175,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       stream.end(req.file.buffer);
     });
   }
+
   const studentToUpdate = await studentModel.findByIdAndUpdate(
     student._id,
     {
@@ -226,7 +209,7 @@ export const deleteStudent = asyncHandler(async (req, res, next) => {
 
   const student = await studentModel.findById(studentId);
   if (!student) {
-    const error = new Error("Stuent not found");
+    const error = new Error("Student not found");
     res.statusCode = 404;
     return next(error);
   }
@@ -237,6 +220,7 @@ export const deleteStudent = asyncHandler(async (req, res, next) => {
     res.statusCode = 404;
     return next(error);
   }
+
   res.status(200).json({
     success: true,
     message: "Student deleted successfully",
@@ -324,12 +308,7 @@ export const fetchAllSubject = asyncHandler(async (req, res, next) => {
   });
 });
 
-const flw = new Flutterwave(
-  process.env.FLW_PUBLIC_KEY,
-  process.env.FLW_SECRET_KEY
-);
-
-// Initiate Payment (Flutterwave)
+//initiate Payment (Paystack)
 export const initiatePaymentWithCard = async (req, res) => {
   try {
     const studentId = req.user._id;
@@ -348,40 +327,47 @@ export const initiatePaymentWithCard = async (req, res) => {
       return next(error);
     }
 
-    // Flutterwave Payment Payload
+    // Paystack Payment Payload
     const payload = {
-      tx_ref: `STU-${Date.now()}`,
-      amount,
+      email,
+      amount: amount * 100, // Paystack requires the amount in kobo (1 NGN = 100 kobo)
       currency: "NGN",
-      redirect_url: `${process.env.FRONTEND_URL}/payment-success`, // Update with your frontend route
-      customer: { email },
-      payment_options: paymentMethod, // "card", "bank_transfer", "googlepay"
+      callback_url: `${process.env.FRONTEND_URL}/payment-success`, 
+      //Update the frontend route
+      customer: { email},
+      payment_options: paymentMethod,  //card, bank_transfer
       customizations: {
         title: "School Payment",
         description: "Pay for video access",
       },
     };
 
-    const response = await flw.Charge.card(payload);
+    // Initiate Paystack Payment
+    paystack.transaction.initialize(payload, (error, body) => {
+      if (error) {
+        return res.status(400).json({ message: "Payment failed", error });
+      }
 
-    if (response.status === "success") {
-      res.json({
-        message: "Payment initiated",
-        paymentLink: response.data.link,
-      });
-    } else {
-      res
-        .status(400)
-        .json({ message: "Payment failed", error: response.message });
-    }
+      if (response.status === "success") {
+        res.json({
+          message: "Payment initiated",
+          paymentLink: body.data.authorization_url,
+        });
+      } else {
+        res.status(400).json({ message: "Payment failed", error: response.message });
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const initiatePaymentWithBankTransfer = async (req, res) => {
+
+
+export const initiatePaymentWithBankTransfer = async (req, res, next) => {
   try {
     const studentId = req.user._id;
+
     if (!studentId) {
       const error = new Error("Please login to continue");
       res.statusCode = 401;
@@ -389,6 +375,17 @@ export const initiatePaymentWithBankTransfer = async (req, res) => {
     }
 
     const { email, amount, paymentMethod } = req.body;
+
+    if (!email || !amount || !paymentMethod) {
+      const error = new Error("Missing required fields: email, amount, or paymentMethod");
+      res.statusCode = 400;
+      return next(error);
+    }
+    if (amount <= 0) {
+      const error = new Error("Amount must be greater than zero");
+      res.statusCode = 400;
+      return next(error);
+    }
     const student = await studentModel.findById(studentId);
 
     if (!student) {
@@ -396,102 +393,91 @@ export const initiatePaymentWithBankTransfer = async (req, res) => {
       res.statusCode = 404;
       return next(error);
     }
-
-    // Flutterwave Payment Payload
-    const payload = {
-      tx_ref: `STU-${Date.now()}`,
-      amount,
-      currency: "NGN",
-      redirect_url: `${process.env.FRONTEND_URL}/payment-success`, // Update with your frontend route
-      customer: { email },
-      payment_options: paymentMethod, // "card", "bank_transfer", "googlepay"
-      customizations: {
-        title: "School Payment",
-        description: "Pay for video access",
-      },
-    };
-
-    const response = await flw.Charge.bank_transfer(payload);
-
-    if (response.status === "success") {
-      res.json({
-        message: "Payment initiated",
-        paymentLink: response.data.link,
-      });
-    } else {
-      res
-        .status(400)
-        .json({ message: "Payment failed", error: response.message });
-    }
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-export const initiatePaymentWithApplePay = async (req, res) => {
-  try {
-    const studentId = req.user._id;
-    if (!studentId) {
-      const error = new Error("Please login to continue");
-      res.statusCode = 401;
+    if (student.balance < amount) {
+      const error = new Error("Insufficient balance");
+      res.statusCode = 400;
       return next(error);
     }
 
-    const { email, amount, paymentMethod } = req.body;
-    const student = await studentModel.findById(studentId);
+    if (paymentMethod === 'bank_transfer') {
+      const transferData = {
+        source: 'balance',
+        amount: amount * 100, 
+        recipient: 'your_recipient_code_here',
+        email: email, 
+      };
 
-    if (!student) {
-      const error = new Error("Student not found");
-      res.statusCode = 404;
+      const paystackResponse = await axios.post('https://api.paystack.co/transfer', transferData, {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      });
+
+      if (paystackResponse.data.status === 'success') {
+        student.balance -= amount;
+        await student.save();
+
+        const newTransaction = new transactionModel({
+          studentId,
+          amount,
+          transactionType: 'transfer',
+          status: 'successful',
+          paymentMethod,
+          transactionDetails: paystackResponse.data.data,
+        });
+        await newTransaction.save();
+
+        res.status(200).json({
+          status: 'success',
+          message: 'Payment successful',
+          transactionDetails: paystackResponse.data.data,
+        });
+      } else {
+        const error = new Error("Payment failed. Please try again.");
+        res.statusCode = 500;
+        return next(error);
+      }
+    } else {
+      const error = new Error("Invalid payment method");
+      res.statusCode = 400;
       return next(error);
     }
-
-    // Flutterwave Payment Payload
-    const payload = {
-      tx_ref: `STU-${Date.now()}`,
-      amount,
-      currency: "NGN",
-      redirect_url: `${process.env.FRONTEND_URL}/payment-success`, // Update with your frontend route
-      customer: { email },
-      payment_options: paymentMethod, // "card", "bank_transfer", "googlepay"
-      customizations: {
-        title: "School Payment",
-        description: "Pay for video access",
-      },
-    };
-
-    const response = await flw.Charge.applepay(payload);
-
-    if (response.status === "success") {
-      res.json({
-        message: "Payment initiated",
-        paymentLink: response.data.link,
-      });
-    } else {
-      res
-        .status(400)
-        .json({ message: "Payment failed", error: response.message });
-    }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.statusCode = 500;
+    next(error);
   }
 };
 
 export const verifyPayment = async (req, res) => {
   try {
-    const { transactionId, studentId } = req.body;
-    const response = await flw.TransactionVerify({ id: transactionId });
+    const { reference, studentId } = req.body;
+
+    const response = await axios.get(
+      `https://api.paystack.co/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+
+    const paymentData = response.data;
 
     if (
-      response.status === "success" &&
-      response.data.status === "successful"
+      paymentData.status === true &&
+      paymentData.data.status === 'success'
     ) {
       await studentModel.findByIdAndUpdate(studentId, { hasPaid: true });
-      res.json({ message: "Payment successful! You can now access videos." });
+      return res.json({
+        message: 'Payment successful! You can now access videos.',
+      });
     } else {
-      res.status(400).json({ message: "Payment verification failed" });
+      return res.status(400).json({ message: 'Payment verification failed' });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Verification error:', error.message);
+    return res.status(500).json({ error: 'Something went wrong during verification' });
   }
 };
+
