@@ -16,6 +16,7 @@ import {
   forgotPasswordStudent,
   sendForgotPasswordOTPStudent,
 } from "../controllers/forgotPassword.controllers.js";
+import Exam from "../model/examModel.js";
 
 const studentRouter = Router();
 
@@ -29,6 +30,30 @@ studentRouter.post("/update-student/:studentId", studentAuth, updateStudent);
 studentRouter.post("/delete-student/:studentId", studentAuth, deleteStudent);
 studentRouter.get("/get-all-subject", studentAuth, fetchAllSubject);
 studentRouter.post("/card-payment", studentAuth, initiatePaymentWithCard);
+
+/**
+ * @swagger
+ * /api/student/bank-payment:
+ *   post:
+ *     summary: Initiate payment with a bank transfer
+ *     tags: [Student]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Payment initiated successfully
+ *       400:
+ *         description: Bad request
+ */
 studentRouter.post(
   "/bank-payment",
   studentAuth,

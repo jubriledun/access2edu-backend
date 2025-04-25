@@ -5,6 +5,7 @@ import globalError from "./config/globalErrors.js";
 import logger from "./config/logger.js";
 import connectDB from "./config/db.js";
 import studentRouter from "./routes/studentRouter.js";
+import swaggerSetup from "./swagger.js";
 import subjectRouter from "./routes/subjectRouter.js";
 import adminRouter from "./routes/adminRouter.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
