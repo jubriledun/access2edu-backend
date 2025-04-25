@@ -22,11 +22,13 @@ app.use(
   })
 );
 
-app.use("/api/v1/students", studentRouter);
-app.use("/api/v1/subjects", subjectRouter);
-app.use("/api/v1/admin", adminRouter);
-app.use("/api/v1/payment", paymentRoutes);
-app.use("/api/v1/webhook", webhookRoutes);
+swaggerSetup(app);
+
+app.use("/api/students", studentRouter);
+app.use("/api/subjects", subjectRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/webhook", webhookRoutes);
 
 app.all("*", (req, res, next) => {
   res.status(400).json({
