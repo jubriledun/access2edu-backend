@@ -54,7 +54,7 @@ const studentRouter = Router();
  */
 studentRouter.post(
   "/register",
-  upload.single("profilePicture", registerStudent)
+  // upload.single("profilePicture", registerStudent)
 );
 
 /**
