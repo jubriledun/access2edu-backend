@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/webhook/paystack:
+ * /api/v1/webhook/paystack:
  *   post:
  *     summary: Handle Paystack webhook events
  *     tags: [Webhook]

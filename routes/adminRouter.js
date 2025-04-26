@@ -15,7 +15,7 @@ const adminRouter = Router();
 
 /**
  * @swagger
- * /api/admin/register-admin:
+ * /api/v1/admin/register-admin:
  *   post:
  *     summary: Register a new admin
  *     tags: [Admin]
@@ -53,7 +53,7 @@ adminRouter.post(
 
 /**
  * @swagger
- * /api/admin/login:
+ * /api/v1/admin/login:
  *   post:
  *     summary: Admin login
  *     tags: [Admin]
@@ -78,7 +78,7 @@ adminRouter.post("/login", Login);
 
 /**
  * @swagger
- * /api/admin/logout:
+ * /api/v1/admin/logout:
  *   post:
  *     summary: Admin logout
  *     tags: [Admin]
@@ -90,7 +90,7 @@ adminRouter.post("/logout", Logout);
 
 /**
  * @swagger
- * /api/admin/send-forgot-password-otp:
+ * /api/v1/admin/send-forgot-password-otp:
  *   post:
  *     summary: Send OTP for admin password recovery
  *     tags: [Admin]
@@ -114,7 +114,7 @@ adminRouter.post("/send-forgot-password-otp", sendForgotPasswordOTPAdmin);
 
 /**
  * @swagger
- * /api/admin/forgot-password:
+ * /api/v1/admin/forgot-password:
  *   post:
  *     summary: Reset admin password
  *     tags: [Admin]
@@ -141,7 +141,7 @@ adminRouter.post("/forgot-password", forgotPasswordAdmin);
 
 /**
  * @swagger
- * /api/admin/exams:
+ * /api/v1/admin/exams:
  *   post:
  *     summary: Create a new exam
  *     tags: [Admin]
@@ -194,7 +194,7 @@ adminRouter.post("/exams", async (req, res) => {
 
 /**
  * @swagger
- * /api/admin/exams/{examId}/questions:
+ * /api/v1/admin/exams/{examId}/questions:
  *   put:
  *     summary: Add questions to an existing exam
  *     tags: [Admin]

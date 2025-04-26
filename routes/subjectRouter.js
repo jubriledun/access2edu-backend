@@ -13,7 +13,7 @@ const subjectRouter = Router();
 
 /**
  * @swagger
- * /api/subjects/add-subject:
+ * /api/v1/subjects/add-subject:
  *   post:
  *     summary: Add a new subject
  *     tags: [Subject]
@@ -50,7 +50,7 @@ subjectRouter.post(
 
 /**
  * @swagger
- * /api/subjects/update-subject:
+ * /api/v1/subjects/update-subject:
  *   post:
  *     summary: Update an existing subject
  *     tags: [Subject]
@@ -79,7 +79,7 @@ subjectRouter.post("/update-subject", adminAuth, updateSubject);
 
 /**
  * @swagger
- * /api/subjects/delete-subject:
+ * /api/v1/subjects/delete-subject:
  *   post:
  *     summary: Delete a subject
  *     tags: [Subject]
@@ -104,7 +104,7 @@ subjectRouter.post("/delete-subject", adminAuth, deleteSubject);
 
 /**
  * @swagger
- * /api/subjects/get-video-by-level:
+ * /api/v1/subjects/get-video-by-level:
  *   get:
  *     summary: Fetch all videos by level
  *     tags: [Subject]
@@ -127,7 +127,7 @@ subjectRouter.get("/get-video-by-level", adminAuth, fetchAllVideosByLevel);
 
 /**
  * @swagger
- * /api/subjects/get-subjects-by-name-level:
+ * /api/v1/subjects/get-subjects-by-name-level:
  *   get:
  *     summary: Fetch all subjects by name and level
  *     tags: [Subject]

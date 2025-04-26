@@ -22,7 +22,7 @@ const studentRouter = Router();
 
 /**
  * @swagger
- * /api/students/register:
+ * /api/v1/students/register:
  *   post:
  *     summary: Register a new student
  *     tags: [Student]
@@ -59,7 +59,7 @@ studentRouter.post(
 
 /**
  * @swagger
- * /api/students/login:
+ * /api/v1/students/login:
  *   post:
  *     summary: Student login
  *     tags: [Student]
@@ -84,7 +84,7 @@ studentRouter.post("/login", Login);
 
 /**
  * @swagger
- * /api/students/logout:
+ * /api/v1/students/logout:
  *   post:
  *     summary: Student logout
  *     tags: [Student]
@@ -96,7 +96,7 @@ studentRouter.post("/logout", Logout);
 
 /**
  * @swagger
- * /api/students/update-student/{studentId}:
+ * /api/v1/students/update-student/{studentId}:
  *   post:
  *     summary: Update student details
  *     tags: [Student]
@@ -130,7 +130,7 @@ studentRouter.post("/update-student/:studentId", studentAuth, updateStudent);
 
 /**
  * @swagger
- * /api/students/delete-student/{studentId}:
+ * /api/v1/students/delete-student/{studentId}:
  *   post:
  *     summary: Delete a student
  *     tags: [Student]
@@ -151,7 +151,7 @@ studentRouter.post("/delete-student/:studentId", studentAuth, deleteStudent);
 
 /**
  * @swagger
- * /api/students/get-all-subject:
+ * /api/v1/students/get-all-subject:
  *   get:
  *     summary: Fetch all subjects
  *     tags: [Student]
@@ -163,7 +163,7 @@ studentRouter.get("/get-all-subject", studentAuth, fetchAllSubject);
 
 /**
  * @swagger
- * /api/students/card-payment:
+ * /api/v1/students/card-payment:
  *   post:
  *     summary: Initiate payment with a card
  *     tags: [Student]
@@ -188,7 +188,7 @@ studentRouter.post("/card-payment", studentAuth, initiatePaymentWithCard);
 
 /**
  * @swagger
- * /api/students/bank-payment:
+ * /api/v1/students/bank-payment:
  *   post:
  *     summary: Initiate payment with a bank transfer
  *     tags: [Student]
@@ -217,7 +217,7 @@ studentRouter.post(
 
 /**
  * @swagger
- * /api/students/verify-payment:
+ * /api/v1/students/verify-payment:
  *   post:
  *     summary: Verify a payment
  *     tags: [Student]
@@ -240,7 +240,7 @@ studentRouter.post("/verify-payment", studentAuth, verifyPayment);
 
 /**
  * @swagger
- * /api/students/exams:
+ * /api/v1/students/exams:
  *   get:
  *     summary: Fetch all available exams
  *     tags: [Student]
@@ -272,7 +272,7 @@ studentRouter.get("/exams", studentAuth, async (req, res) => {
 
 /**
  * @swagger
- * /api/students/exams/{examId}/submit:
+ * /api/v1/students/exams/{examId}/submit:
  *   post:
  *     summary: Submit answers for an exam
  *     tags: [Student]

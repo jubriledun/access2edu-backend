@@ -5,7 +5,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/payment/pay:
+ * /api/v1/payment/pay:
  *   post:
  *     summary: Initialize a payment
  *     tags: [Payment]
@@ -59,7 +59,7 @@ router.post("/pay", initializePayment);
 
 /**
  * @swagger
- * /api/payment/verify/{reference}:
+ * /api/v1/payment/verify/{reference}:
  *   get:
  *     summary: Verify a payment
  *     tags: [Payment]
